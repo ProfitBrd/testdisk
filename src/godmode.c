@@ -600,6 +600,22 @@ static list_part_t *search_part(disk_t *disk_car, const list_part_t *list_part_o
 	    start.cylinder, disk_car->geom.cylinders-1,
 	    (unsigned int)(search_location*100/disk_car->disk_size));
 	ask=1;
+	/* === local: write progress to /tmp for external monitor === */
+	{
+	  FILE *p = fopen("/tmp/testdisk.progress.tmp", "w");
+	  if(p)
+	  {
+	    fprintf(p, "%llu %llu %lu %lu\n",
+	            (unsigned long long)search_location,
+	            (unsigned long long)disk_car->disk_size,
+	            (unsigned long)start.cylinder,
+	            (unsigned long)(disk_car->geom.cylinders-1));
+	    fclose(p);
+	    rename("/tmp/testdisk.progress.tmp",
+	           "/tmp/testdisk.progress");
+	  }
+	}
+	/* === end local addition === */
       }
     }
     else if((start.cylinder & 0x7FFF)==0)
