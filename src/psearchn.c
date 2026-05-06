@@ -348,6 +348,24 @@ pstatus_t photorec_aux(struct ph_param *params, const struct ph_options *options
         if(current_time>previous_time)
         {
           previous_time=current_time;
+          /* === local: write progress to /tmp for external monitor === */
+          {
+            const uint64_t pos = offset - params->partition->part_offset;
+            const uint64_t tot = params->partition->part_size;
+            FILE *p = fopen("/tmp/photorec.progress.tmp", "w");
+            if(p)
+            {
+              fprintf(p, "%u %llu %llu %u\n",
+                      params->pass,
+                      (unsigned long long)pos,
+                      (unsigned long long)tot,
+                      params->file_nbr);
+              fclose(p);
+              rename("/tmp/photorec.progress.tmp",
+                     "/tmp/photorec.progress");
+            }
+          }
+          /* === end local addition === */
 #ifdef HAVE_NCURSES
           ind_stop=photorec_progressbar(stdscr, params->pass, params, offset, current_time);
 #endif
